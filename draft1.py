@@ -41,4 +41,20 @@ positions = 2 x 2 = 4
 '''
 
 # building padding funcions:
-
+def pad2d(X, pad):
+    # X is input image
+    X_padded = np.pad(
+        # np.pad adds values around the edges of array
+        X_padded = np.pad(
+            X,
+            (
+                (0, 0),     # do not pad batch dimension
+                (0, 0),     # do not pad pad channels          
+                (pad, pad), # Add padding to top and bottom
+                (pad, pad)  # add padding to left and right
+            ),
+            mode = 'constant' # fill added values wth 0
+        )
+    )
+    return X_padded
+    # return padded image
