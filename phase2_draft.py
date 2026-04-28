@@ -60,3 +60,12 @@ def maxpool_forward(X, k, stride):
 # Find max location
 # Put gradient there
 # Everything else = 0
+
+def maxpool_backward(X, dout, k, stride):
+    # X: org input (H, W)
+    # dout: gradieny from next layer (H_out, W_out)
+    
+    H, W = X.shape
+    dX = np.zeros_like(X)
+    
+    
