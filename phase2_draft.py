@@ -68,4 +68,73 @@ def maxpool_backward(X, dout, k, stride):
     H, W = X.shape
     dX = np.zeros_like(X)
     
+    out_H, out_W = dout.shape
     
+    for i in range(out_H):
+        for j in range(out_W):
+            
+            # define window
+            h_start = i * stride
+            h_end = h_start + k
+            
+            w_start = i * stride
+            w_end = w_start + k
+            
+            # extract patch
+            patch = X[h_start:h_end, w_start:w_end]
+            
+            max_idx = np.argmax(patch)
+            
+            max_pos = np.unravel_index(max_idx, patch.shape)
+            
+            dX[h_start + max_pos[0], w_start + max_pos[1]] += dout[i, j]
+    
+    return dX       
+
+# average pool
+
+def avgpool_forward(X, k, stride):
+    H, W = X.shape
+    
+    out_H = (H - k) // stride
+    out_W = (W - k) // stride
+    
+    out = np.zeros((out_H, out, W))
+    
+    for i in range(out_H):
+        for j in range(out_W):
+            
+            h_start = i * stride
+            h_end = h_start + k
+            
+            w_start = j * stride
+            w_end = w_start + k
+            
+            patch = X[h_start:h_end, w_start:w_end]
+            
+            # take avg
+            out[i, j] = np.mean(patch)
+            
+    return out
+
+
+def avgpool_backward(X, dout, k, stride):
+    H, W = X.shape
+    dX = np.zeros_like(X)
+    
+    out_H, out_W = dout.shape
+    
+    for i in range(out_H):
+        for j in range(out_W):
+            
+            h_start = i * stride
+            h_end = h_start + k
+            
+            w_start = j * stride
+            w_end = w_start + k
+            
+            gradient = dout[i, j] / (k * k)
+            
+            dX[h_start:h_end, w_start:w_end] += gradient
+            
+    return dX
