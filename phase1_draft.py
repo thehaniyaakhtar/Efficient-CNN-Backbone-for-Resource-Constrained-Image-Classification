@@ -183,3 +183,100 @@ def conv2d_forward(X, kernel):
     return out
 
 # backward 
+
+def conv2d_backward(X, kernel, dout):
+    # X: input img
+    # kernel: (k, k)
+    # dout: gradient from next layer
+    
+    k = kernel.shape[0]
+    
+    # Step 1: Recreate patches from forward pass
+    # shape: (num_patches, k*k)
+    patches = im2col(X, k)
+    
+    # Step 2: Faltten dout to match patches
+    # (H_out, W_out) -> (num_patches,)
+    dout_flat = dout.flatten()
+    
+    # Gradient wrt kernel
+    # each patch contributes to kernel update
+    # shape: (k*k,)
+    dkernel_flat = patches.T @ dout_flat
+    # sccumulates how each patch affects the kernel
+    
+    # reshape back to (k, k)
+    dkernel = dkernel_flat.reshape(k, k)
+    
+    # Gradient wrt input
+    # reversing the forward operations
+    
+    # flatten kernel
+    kernel_flat = kernel.flatten()
+    
+    # Computing gradient for each patch
+    # shape: (num_patches, k*k)
+    dpatches = np.outer(dout_flat, kernel_flat)
+    
+    # Step4: reconstruct dx from patches
+    H, W = X.shape
+    dX = np.zeros_like(X)
+    
+    patch_idx = 0
+    
+    for i in range(H - k + 1):
+        for j in range(W - k + 1):
+            
+            # reshape back to (k, k)
+            patch_grad = dpatches[patch_idx].reshape(k, k)
+            
+            # add gradient to correct location
+            dX[i:i+k, j:j+k] += patch_grad
+            
+            patch_idx += 1
+    
+    return dX, dkernel
+
+
+# ReLU Activation
+# ReLU(x) = max(0, x)
+def relu_forward(X):
+    # Replace negative values with 0
+    out = np.maximum(0, X)
+    return out
+
+# Backward ReLU:
+# input > 0 -> gradient passes
+# input < 0 -> gradient = 0
+
+def relu_backward(X, dout):
+    # d out: gradient from the next layer
+    dX = dout.copy()
+    
+    # Zero gradient where input was negative
+    
+    dX[X <= 0] = 0
+    
+    return dX
+
+# flattening
+
+# forward: 2D -> 1D
+def flattening_forward(X):
+    # save org shape
+    original_shape = X.shape
+    
+    # Convert multi-dim to 1D vector
+    out = X.flatten()
+    
+    return out, original_shape
+
+# backward: 1D gradient -> reshape -> 2D
+# it doesnt change values
+# it passes gradient in correct shape
+def flattening_backward(dout, original_shape):
+    # Restoring gradient back to original shape
+    dX = dout.reshape(original_shape)
+    
+    return dX
+
