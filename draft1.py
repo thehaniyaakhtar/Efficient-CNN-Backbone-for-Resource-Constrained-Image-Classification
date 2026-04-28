@@ -155,3 +155,31 @@ def im2col(X, k):
 # kernel = 3 x 3 
 # 5 - 3 + 1 = 3; 3 vert and hor posiitons
 # 3 x 3 = 9 rows in im2col output
+
+# single channel conv2d
+# output = patches @ kernel_flat
+# where patch x kernel -> oen number
+def conv2d_forward(X, kernel):
+    k = kernel.shape[0]
+    
+    # convert image to patches
+    # using previous kernels
+    patches = im2col(X, k)
+    
+    # flatten kernel
+    # it can be multiplied with each patch
+    kernel_flat = kernel.flatten()
+    
+    # matrix multiply
+    # actual convolution
+    # 
+    out = patches @ kernel_flat
+    
+    # reshape to 2d
+    # convert 1D output to 2D
+    out_size = int(np.sqrt(len(out)))
+    out = out.reshape(out_size, out_size)
+    
+    return out
+
+# backward 
