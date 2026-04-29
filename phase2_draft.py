@@ -138,3 +138,31 @@ def avgpool_backward(X, dout, k, stride):
             dX[h_start:h_end, w_start:w_end] += gradient
             
     return dX
+
+# each cell gets an avg value of dout / (k * k)
+
+class CNNBlock:
+    def __init__(self, kernel, pool_size = 2, stride=2):
+        self.kernel = kernel
+        self.k = kernel.shape[0]
+        self.pool_size = pool_size
+        self.stride = stride
+        
+    def forward(self, X):
+        self.X = X
+        self.conv_out = conv2d_forward(X, self.kernel)
+        
+        # relu  forward
+        self.relu_out = relu_forward(self.conv_out)
+        
+        self.pool_out = maxpool_forward(
+            self.relu_out, self.pool_size, self.stride
+        )
+        
+        return self.pool_out
+    
+    
+    def backward(self, dout):
+        dpool = maxpool_backward(
+            self.relu_out, dout, self.pool_size, self.stride
+        )
