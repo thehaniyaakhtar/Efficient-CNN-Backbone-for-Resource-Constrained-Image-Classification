@@ -45,11 +45,11 @@ def maxpool_forward(X, k, stride):
             h_start = i * stride
             h_end = h_start + k
             
-            W_start = j * stride
-            W_end = W_start + k
+            w_start = j * stride
+            w_end = w_start + k
             
             # extract patch
-            patch = X[h_start : h_end, W_start : W_end]
+            patch = X[h_start : h_end, w_start : w_end]
             
             # take max
             out[i, j] = np.max(patch)
@@ -77,7 +77,7 @@ def maxpool_backward(X, dout, k, stride):
             h_start = i * stride
             h_end = h_start + k
             
-            w_start = i * stride
+            w_start = j * stride
             w_end = w_start + k
             
             # extract patch
@@ -96,8 +96,8 @@ def maxpool_backward(X, dout, k, stride):
 def avgpool_forward(X, k, stride):
     H, W = X.shape
     
-    out_H = (H - k) // stride
-    out_W = (W - k) // stride
+    out_H = (H - k) // stride + 1
+    out_W = (W - k) // stride + 1
     
     out = np.zeros((out_H, out, W))
     
@@ -166,3 +166,12 @@ class CNNBlock:
         dpool = maxpool_backward(
             self.relu_out, dout, self.pool_size, self.stride
         )
+        
+        drelu = relu_backward(self.conv_out, dpool)
+        
+        dX, dkernel = conv2d_backward(self.X, self.kernel, drelu)
+        
+        self.dkernel = dkernel
+        
+        return dX
+    
