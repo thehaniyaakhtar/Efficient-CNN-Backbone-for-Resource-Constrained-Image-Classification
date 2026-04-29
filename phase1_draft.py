@@ -7,6 +7,35 @@ H: height
 W: width
 '''
 
+'''
+A kernel is a small matrix of no.s used to extract specific patterns
+from an img
+eg, one designed to detect texture/ edges, as it slides over images
+it produces a higher value when it reaches the required pattern vs a 
+lower value when it does not
+These kernel values are not defined, they are learned during training 
+and each kernel captures useful features for the task
+
+A kernel can only be placed in exaclty one position because it must fully fit in an img
+when applied, it computes a single number
+the entire region is compressed to one scalar value
+
+in convolution, ,
+output size = (input size - kernel size) + 1 (stride)
+
+Losses that occur:
+Spatial resolution loss
+    output becomes smaller
+    fewer positions representing the image
+    Fine grained details disappear 
+Compression within each patch
+    each patch is reduced to a single number
+    different patches can give same output even if internal pixel arrangements are diff
+    ie some distinctions are lost
+    
+'''
+
+
 import numpy as np
 # example of a grayscale image:
 X = np.array([
