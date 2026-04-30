@@ -180,6 +180,9 @@ def im2col(X, k):
     return np.array(patches)
     # convert patch to array
     
+
+
+    
 # image = 5 x 5
 # kernel = 3 x 3 
 # 5 - 3 + 1 = 3; 3 vert and hor posiitons
@@ -265,6 +268,52 @@ def conv2d_backward(X, kernel, dout):
             patch_idx += 1
     
     return dX, dkernel
+'''
+backwad pass:
+how did each part of the input and kernel contribute to the final loss
+during the forward pass:
+conv operation takes patches + kernel -> output: feature map
+
+loss is computed at the end of the network 
+the backward process begins by propagating gradients from loss toward the input
+
+the conv layer receives is dout, represents how much each output value effects the loss
+for every position in the output feature map, dout specifies how sensitive loss is to the change of
+specific output value
+
+To compute gradients, the backward pass must follow the same structure as forward pass
+as it conceptually maps patches of the input to the output, the backward pass
+reverses this relationship, each output traces the patch that produced it
+
+gradient wrt kernel is computed by looking at how each patch influences the output
+if an output has a large gradient -> strongly affects loss
+then the patch that produces it should have a stronger influence on the kernel
+the kernel gradient is an accumulation of al patches, where each patch is weighed by how imp the putput was
+thus all patches are combined with their resp dout values
+dout tells how each kernel weight should reduce the loss
+
+gradient wrt input
+each output value depends on all elements inside the pach
+during backward pass he gradient of that output much be dist back to all those inputs
+this is guided by kernel weights
+in forward pass, each input value was multiplied by a specific kernel weight
+thus in backward pass the influence flows back proportionately through the same weights
+
+patches overlap in the input ie
+a single inpt pixel may have contributed to mutl outputs during the forward pass
+thus in the backward pass the pixel will receive gradient contri from mutl outpts
+these contris are summed together which is why the input gradientt is built by accumulating values rather than 
+assigning at once
+
+overall
+the backwad process reverses the compression done in formward pass
+the forward pass reduces eacch patch to a single number
+the backward pass expands each output gradient back to its corresponding patch
+and conbines all overlapping contri at the same time, aggregarting info rom all patches
+to determine how kernels sshould be adjustd
+this ensures both input + kernel receive precise updates based on their inflience on the final loss
+
+'''
 
 
 # ReLU Activation
