@@ -114,19 +114,24 @@ def maxpool_forward(X, k, stride):
     
     out_H = (H-k) // stride + 1 #  Output height
     out_W = (W-k) // stride + 1 # Output width
+    # Computing how many positions the window can take
+    # the windoe much fully fit inside the input
     
     out = np.zeros((out_H, out_W)) # Initialize output
+    # an empty output grid
     
     for i in range(out_H):
         for j in range(out_W):
+            # sliding the window across the image
             h_start = i * stride
             h_end = h_start + k
             
             w_start = j * stride
             w_end = w_start + k
             
-            patch = X[h_start:h_end, w_start:w_end] # Extract patch
-            out[i, j] = np.max(patch) # Take max
+            patch = X[h_start:h_end, w_start:w_end] 
+            # Extract patch that the window is looking for
+            out[i, j] = np.max(patch) # Take max from the selcted patch
         
     return out # Return pooled output
 
@@ -134,7 +139,57 @@ def maxpool_forward(X, k, stride):
 def maxpool_backward(X, dout, k, stride):
     H, W = X.shape
     dX = np.zeros_like(X)
+    # initializing the gradient for the input
     
     out_H, out_W = dout.shape
+    # conputing the number of output positions
     
-    for i  in range()
+    for i  in range(out_H):
+        for j in range(out_W):
+            # looping over each output position, each (i, j) corresponds to one patch in forward
+            h_start = i * stride
+            h_end = h_start + k
+            
+            w_start = j * stride
+            w_end = w_start + k
+            
+            patch = X[h_start:h_end, w_start:w_end]
+            # extract the same region used in forward
+            
+            max_idx = np.argmax(patch) # index of max value
+            # argmax finds the largest value
+            max_pos = np.unravel_index(max_idx, patch.shape) 
+            # unravel_i converts it to (row, col)
+            
+            dX[h_start + max_pos[0], w_start + max_pos[1]] += dout[i, j]
+            # entire backward logic
+            # take the gradient form output dout[i, j]
+            # assign to only max location
+            # everything else = 0
+            # += patches overlap, gradients accumulate
+            
+    return dX
+
+# Average Pool
+
+def avgpool_forward(X, k, stride):
+    H, W = X.shape
+    
+    out_H = (H - k) // stride + 1
+    out_W = (W - k) // stride + 1
+    
+    out = np.zeros((out_H, out_W))
+    
+    for i in range(out_H):
+        for j in range(out_W):
+            h_start = i * stride
+            h_end = h_start + k
+
+            w_start = j * stride
+            w_end = w_start + k
+            
+            patch = X[h_start:h_end, w_start:w_end]
+            out[i, j] = np.mean(patch)
+            
+    return out
+

@@ -61,6 +61,22 @@ def maxpool_forward(X, k, stride):
 # Put gradient there
 # Everything else = 0
 
+'''
+Maxpool Forward:
+downsampling operation
+selectes the most imp (max) values from each local region of the input
+input matrix: H x W
+window size: k x k
+a stride (how far the window moves each time)
+
+the window slides over the input,, at each position:
+a small patch is extracted
+the max value inside the patch is selected
+the value becomes one element in the output
+
+'''
+
+
 def maxpool_backward(X, dout, k, stride):
     # X: org input (H, W)
     # dout: gradieny from next layer (H_out, W_out)
@@ -89,7 +105,20 @@ def maxpool_backward(X, dout, k, stride):
             
             dX[h_start + max_pos[0], w_start + max_pos[1]] += dout[i, j]
     
-    return dX       
+    return dX      
+
+'''
+how do gradients flow
+in forward pass, each patch produces one output value ie max
+in backward, the output gradient must go back to only the chosen value
+
+all other values:
+had no influence, they get 0 gradient
+
+for each patch, find where the max comes from
+send the gradient only to the postion
+'''
+ 
 
 # average pool
 
