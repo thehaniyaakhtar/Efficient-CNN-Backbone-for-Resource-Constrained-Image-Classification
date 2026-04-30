@@ -193,3 +193,74 @@ def avgpool_forward(X, k, stride):
             
     return out
 
+def avgpool_backward(X, dout, k, stride):
+    H, W, = X.shape
+    dX = np.zeros_like(X) # ??
+    
+    out_H, out_W = dout.shape
+    
+    for i in range(out_H):
+        for j in range(out_W):
+            h_start = i * stride
+            h_end = h_start + k
+            
+            w_start = j * stride
+            w_end = w_start + k
+            
+            gradient = dout[i, j] / (k * k)
+            
+            dX[h_start:h_end, w_start:w_end] += gradient
+            
+    return dX
+
+
+class CNNBlock:
+    def __init__(self, kernel, pool_size=2, stride=2):
+        self.kernel = kernel
+        self.k = kernel.shape[0]
+        self.pool_size = pool_size
+        self.stride = stride
+        
+    def forward(self, X):
+        # input comes in
+        self.X = X
+        
+        self.conv_out = conv2d_forward(X, self.kernel)
+        # input is broken into patches
+        # each patch is combined with kernel
+        # u get a feature map
+        
+        self.relu_out = relu_forward(self.conv_out)
+        
+        self.pool_out = maxpool_forward(
+            self.relu_out, self.pool_size, self.stride
+        )
+        # feature map is divided into patches
+        # from each patch the strongest one is kept
+        
+        return self.pool_out
+        # output that is passes into the next layer
+    
+    def backward(self, dout):
+        dpool = maxpool_backward(
+            self.relu_out, dout, self.pool_size, self.stride
+        )
+        # each pooled value came form a pax in patch
+        # gradient only goes to max location
+        # everything else gets 0 gradient
+        
+        drelu = relu_backward(self.conv_out, dpool)
+        # input > 0: gradient passes
+        # input <= 0: gradient beomes 0
+        
+        dX, dkernel = conv2d_backward(self.X, self.kernel, drelu)
+        # does 2 things:
+        # gradient wrt kernel: which patterns should the kernel learn more/less
+        # gradient wrt input: how did each input pixel affect the loss
+        
+        self.dkernel = dkernel
+        # optimizer will update using this gradient
+        
+        return dX
+        # return input gradient to the prev layer
+        
