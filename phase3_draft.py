@@ -140,8 +140,8 @@ Convert those values between 0 and 1
 
 Step3: Reweight
 Scale each channel using its weight
-imp chanels: multiplied by values close to 1
-less imp: mult by values close to 0
+imp chanels: multiplied by values close to 1: stay strong
+less imp: mult by values close to 0: get suppressed
 '''
 
 

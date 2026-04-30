@@ -203,4 +203,8 @@ class CNNBlock:
         self.dkernel = dkernel
         
         return dX
-    
+
+
+'''
+
+'''
