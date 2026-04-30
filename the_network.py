@@ -85,5 +85,56 @@ def conv2d_backward(X, kernel, dout):
             patch_idx += 1
             
     return dX, dkernel
+
+# ReLU
+
+def relu_forward(X):
+    return np.maximum(0, X)
+
+def relu_backward(X, dout):
+    dX = dout.copy() # Copy the upstream gradient
+    dX[X <= 0] = 0 # Zero out where input is negative
+    return dX
     
+# Flatten
+
+def flatten_forward(X):
+    original_shape = X.shape # store org shape
+    out = X.flatten() # convert to 1D vector
+    return out, original_shape # Return flattened + shape
+
+def flatten_backward(dout, original_shape):
+    return dout.reshape(original_shape) # Restore original shape
+
+
+# Maxpool
+
+def maxpool_forward(X, k, stride):
+    H, W = X.shape # Input dimensions
     
+    out_H = (H-k) // stride + 1 #  Output height
+    out_W = (W-k) // stride + 1 # Output width
+    
+    out = np.zeros((out_H, out_W)) # Initialize output
+    
+    for i in range(out_H):
+        for j in range(out_W):
+            h_start = i * stride
+            h_end = h_start + k
+            
+            w_start = j * stride
+            w_end = w_start + k
+            
+            patch = X[h_start:h_end, w_start:w_end] # Extract patch
+            out[i, j] = np.max(patch) # Take max
+        
+    return out # Return pooled output
+
+
+def maxpool_backward(X, dout, k, stride):
+    H, W = X.shape
+    dX = np.zeros_like(X)
+    
+    out_H, out_W = dout.shape
+    
+    for i  in range()
